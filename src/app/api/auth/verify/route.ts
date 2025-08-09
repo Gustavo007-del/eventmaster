@@ -1,54 +1,36 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/lib/db'
-import { verifyToken, getTokenFromRequest } from '@/lib/auth'
+import { NextResponse } from 'next/server'
+import { db, testConnection } from '@/lib/db'
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    console.log('🔍 Token verification request')
+    console.log('🧪 Testing database connection')
     
-    const token = getTokenFromRequest(request)
+    // Test basic connection
+    const connected = await testConnection()
+    if (!connected) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Database connection failed' 
+      }, { status: 500 })
+    }
+
+    // Test user operations
+    const userCount = await db.getUserCount()
+    const users = await db.getAllUsers()
     
-    if (!token) {
-      console.log('❌ No token provided')
-      return NextResponse.json(
-        { message: 'No token provided' },
-        { status: 401 }
-      )
-    }
-
-    console.log('🎫 Verifying token')
-    const payload = verifyToken(token)
-    if (!payload) {
-      console.log('❌ Invalid token')
-      return NextResponse.json(
-        { message: 'Invalid token' },
-        { status: 401 }
-      )
-    }
-
-    // Find user - getUserById returns User (without password)
-    console.log('👤 Finding user by ID:', payload.userId)
-    const user = await db.getUserById(payload.userId)
-    if (!user) {
-      console.log('❌ User not found')
-      return NextResponse.json(
-        { message: 'User not found' },
-        { status: 404 }
-      )
-    }
-
-    // User already doesn't have password field, so no need to destructure
-    console.log('✅ Token verification successful for:', user.email)
-
-    return NextResponse.json({
-      user: user,
-      valid: true
+    console.log('✅ Database test successful')
+    
+    return NextResponse.json({ 
+      success: true, 
+      message: 'Database connection working perfectly',
+      userCount: userCount,
+      users: users.map(u => ({ id: u.id, name: u.name, email: u.email, role: u.role }))
     })
   } catch (error) {
-    console.error('💥 Token verification error:', error)
-    return NextResponse.json(
-      { message: 'Internal server error' },
-      { status: 500 }
-    )
+    console.error('💥 Database test error:', error)
+    return NextResponse.json({ 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Unknown error occurred'
+    }, { status: 500 })
   }
 }
