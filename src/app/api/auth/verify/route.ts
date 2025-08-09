@@ -5,9 +5,9 @@ import { verifyToken, getTokenFromRequest } from '@/lib/auth'
 export async function GET(request: NextRequest) {
   try {
     console.log('🔍 Token verification request')
-
+    
     const token = getTokenFromRequest(request)
-
+    
     if (!token) {
       console.log('❌ No token provided')
       return NextResponse.json(
@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Find user
+    // Find user - getUserById returns User (without password)
     console.log('👤 Finding user by ID:', payload.userId)
     const user = await db.getUserById(payload.userId)
     if (!user) {
@@ -37,13 +37,11 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Return user data (without password)
-    const { password: _, ...userWithoutPassword } = user
-
+    // User already doesn't have password field, so no need to destructure
     console.log('✅ Token verification successful for:', user.email)
 
     return NextResponse.json({
-      user: userWithoutPassword,
+      user: user,
       valid: true
     })
   } catch (error) {
