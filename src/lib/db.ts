@@ -1,5 +1,5 @@
 import { Pool } from 'pg'
-import { User, Booking } from '@/types'
+import { User, Booking, DatabaseUser } from '@/types'
 
 // PostgreSQL connection pool
 const pool = new Pool({
@@ -23,8 +23,8 @@ export async function testConnection() {
 
 // User database operations
 export const db = {
-  // Get user by email
-  async getUserByEmail(email: string): Promise<User | null> {
+  // Get user by email (returns DatabaseUser with password)
+  async getUserByEmail(email: string): Promise<DatabaseUser | null> {
     try {
       const result = await pool.query('SELECT * FROM users WHERE email = $1', [email])
       return result.rows[0] || null
@@ -34,10 +34,13 @@ export const db = {
     }
   },
 
-  // Get user by ID
+  // Get user by ID (returns public User without password)
   async getUserById(id: string | number): Promise<User | null> {
     try {
-      const result = await pool.query('SELECT * FROM users WHERE id = $1', [id])
+      const result = await pool.query(
+        'SELECT id, name, email, role, created_at, updated_at FROM users WHERE id = $1', 
+        [id]
+      )
       return result.rows[0] || null
     } catch (error) {
       console.error('Error getting user by ID:', error)
@@ -45,12 +48,12 @@ export const db = {
     }
   },
 
-  // Create new user
+  // Create new user (returns public User without password)
   async createUser(userData: { name: string; email: string; password: string; role?: string }): Promise<User> {
     try {
       const { name, email, password, role = 'user' } = userData
       const result = await pool.query(
-        'INSERT INTO users (name, email, password, role, created_at, updated_at) VALUES ($1, $2, $3, $4, NOW(), NOW()) RETURNING *',
+        'INSERT INTO users (name, email, password, role, created_at, updated_at) VALUES ($1, $2, $3, $4, NOW(), NOW()) RETURNING id, name, email, role, created_at, updated_at',
         [name, email, password, role]
       )
       return result.rows[0]
@@ -60,8 +63,8 @@ export const db = {
     }
   },
 
-  // Update user
-  async updateUser(id: string | number, userData: Partial<User>): Promise<User | null> {
+  // Update user (returns public User without password)
+  async updateUser(id: string | number, userData: Partial<Omit<User, 'id'>>): Promise<User | null> {
     try {
       const fields = []
       const values = []
@@ -80,7 +83,7 @@ export const db = {
       fields.push(`updated_at = NOW()`)
       values.push(id)
 
-      const query = `UPDATE users SET ${fields.join(', ')} WHERE id = $${paramCount} RETURNING *`
+      const query = `UPDATE users SET ${fields.join(', ')} WHERE id = $${paramCount} RETURNING id, name, email, role, created_at, updated_at`
       const result = await pool.query(query, values)
       return result.rows[0] || null
     } catch (error) {
@@ -89,7 +92,7 @@ export const db = {
     }
   },
 
-  // Get all users (admin only)
+  // Get all users (returns public Users without passwords)
   async getAllUsers(): Promise<User[]> {
     try {
       const result = await pool.query('SELECT id, name, email, role, created_at, updated_at FROM users ORDER BY created_at DESC')

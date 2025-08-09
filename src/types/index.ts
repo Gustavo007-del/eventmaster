@@ -1,3 +1,4 @@
+// Updated types to fix TypeScript errors
 export interface User {
   id: number;
   name: string;
@@ -5,7 +6,22 @@ export interface User {
   role: 'user' | 'admin';
   created_at: string;
   updated_at: string;
+  // Note: password is intentionally excluded from public User type
 }
+
+// Internal database user type (includes password)
+export interface DatabaseUser {
+  id: number;
+  name: string;
+  email: string;
+  password: string;
+  role: 'user' | 'admin';
+  created_at: string;
+  updated_at: string;
+}
+
+// ... (rest of the types from fixed-types.ts above)
+
 
 export interface Service {
   id: number;

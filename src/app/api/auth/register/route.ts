@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
     console.log('🔒 Hashing password')
     const hashedPassword = await hashPassword(password)
 
-    // Create user
+    // Create user (this returns public User without password)
     console.log('👤 Creating user')
     const user = await db.createUser({
       name: name.trim(),
@@ -78,11 +78,8 @@ export async function POST(request: NextRequest) {
       role: user.role,
     })
 
-    // Return user data (without password)
-    const { password: _, ...userWithoutPassword } = user
-
     return NextResponse.json({
-      user: userWithoutPassword,
+      user: user,
       token,
       message: 'Registration successful'
     }, { status: 201 })
