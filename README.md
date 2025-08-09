@@ -83,6 +83,7 @@ npm install
    # Exit psql
    \q
    ```
+# Test commit to trigger Vercel deploy
 
 2. **Run Database Setup Script**:
    ```bash
