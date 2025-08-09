@@ -84,7 +84,7 @@ npm install
    \q
    ```
 # Test commit to trigger Vercel deploy
-
+# nwww
 2. **Run Database Setup Script**:
    ```bash
    # Run the setup script
