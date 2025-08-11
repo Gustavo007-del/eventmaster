@@ -87,8 +87,6 @@ npm install
 # nwww
 # nnnn
 # mmmm
-# kkk
-# hh
 
 2. **Run Database Setup Script**:
    ```bash
