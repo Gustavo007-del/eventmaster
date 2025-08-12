@@ -12,7 +12,7 @@ export function TablesChairsPreview() {
           </p>
         </div>
         <div className="text-center">
-          <Link href="/services?category=tables-chairs">
+          <Link href="/tables-chairs">
             <Button size="lg">View Furniture</Button>
           </Link>
         </div>

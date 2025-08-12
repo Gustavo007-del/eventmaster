@@ -12,7 +12,7 @@ export function CateringPreview() {
           </p>
         </div>
         <div className="text-center">
-          <Link href="/services?category=catering">
+          <Link href="/catering">
             <Button size="lg">Explore Catering</Button>
           </Link>
         </div>

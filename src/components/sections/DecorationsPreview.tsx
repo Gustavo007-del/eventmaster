@@ -12,7 +12,7 @@ export function DecorationsPreview() {
           </p>
         </div>
         <div className="text-center">
-          <Link href="/services?category=decorations">
+          <Link href="/decorations">
             <Button size="lg">Explore Decorations</Button>
           </Link>
         </div>
