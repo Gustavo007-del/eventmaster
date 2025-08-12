@@ -111,7 +111,7 @@ export function LoginForm() {
       <div className="mt-8 p-4 bg-blue-50 rounded-xl border border-blue-200">
         <h3 className="text-sm font-semibold text-blue-900 mb-2">Demo Credentials</h3>
         <div className="space-y-1 text-xs text-blue-700">
-          <p><strong>Admin:</strong> admin@eventmaster.com / admin123</p>
+          <p><strong>Admin:</strong> admin@eventmaster.com / Admin123</p>
           <p><strong>User:</strong> Create a new account</p>
         </div>
       </div>

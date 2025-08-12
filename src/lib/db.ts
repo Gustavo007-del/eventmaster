@@ -1,5 +1,6 @@
 import { Pool } from 'pg'
 import { User, Booking, DatabaseUser } from '@/types'
+console.log("DATABASE_URL =", process.env.DATABASE_URL);
 
 // PostgreSQL connection pool
 const pool = new Pool({
