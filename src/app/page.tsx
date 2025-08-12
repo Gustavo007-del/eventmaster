@@ -6,6 +6,9 @@ import { Testimonials } from '@/components/sections/Testimonials'
 import { Stats } from '@/components/sections/Stats'
 import { CTA } from '@/components/sections/CTA'
 import { Footer } from '@/components/layout/Footer'
+import { DecorationsPreview } from '@/components/sections/DecorationsPreview'
+import { CateringPreview } from '@/components/sections/CateringPreview'
+import { TablesChairsPreview } from '@/components/sections/TablesChairsPreview'
 
 export default function HomePage() {
   return (
@@ -15,6 +18,9 @@ export default function HomePage() {
         <Hero />
         <Stats />
         <ServicesPreview />
+        <DecorationsPreview />
+        <CateringPreview />
+        <TablesChairsPreview />
         <EquipmentPreview />
         <Testimonials />
         <CTA />

@@ -28,7 +28,7 @@ export function Header() {
               <Sparkles className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-gray-900">Krishna L&R</h2>
+              <h2 className="text-xl font-bold text-gray-900">Krishna Pro Events</h2>
               <p className="text-xs text-gray-500">Professional Events</p>
             </div>
           </Link>

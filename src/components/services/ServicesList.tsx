@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
 import { formatPrice } from '@/lib/utils'
+import Link from 'next/link';
 
 const services = [
   {
@@ -13,6 +14,7 @@ const services = [
     features: ["Premium venue decoration", "5-star catering", "Professional photography", "Live entertainment"],
     popular: true,
     image: "https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=600"
+    
   },
   {
     id: 2,
@@ -106,9 +108,10 @@ export function ServicesList() {
               ))}
             </ul>
 
-            <Button className="w-full">
-              Book This Service
-            </Button>
+            
+            <Link href={`/booking?service=${encodeURIComponent(service.name)}`}>
+            <Button size="sm" className="w-full">Book This Service</Button>
+            </Link>
           </CardContent>
         </Card>
       ))}

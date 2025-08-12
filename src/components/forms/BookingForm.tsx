@@ -1,8 +1,8 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '@/context/AuthContext'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Card, CardContent, CardHeader } from '@/components/ui/Card'
@@ -11,15 +11,24 @@ import toast from 'react-hot-toast'
 export function BookingForm() {
   const { user } = useAuth()
   const router = useRouter()
+  const searchParams = useSearchParams()
+
+  const serviceFromUrl = searchParams.get('service') || ''
+
   const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState({
-    serviceName: '',
-    eventType: '',
+    serviceName: serviceFromUrl,
     eventDate: '',
     guests: '',
     message: '',
     budget: ''
   })
+
+  useEffect(() => {
+    if (serviceFromUrl) {
+      setFormData(prev => ({ ...prev, serviceName: serviceFromUrl }))
+    }
+  }, [serviceFromUrl])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setFormData({
@@ -40,20 +49,27 @@ export function BookingForm() {
     setIsLoading(true)
 
     try {
-      // Simulate booking creation
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      const res = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...formData,
+          guests: parseInt(formData.guests, 10)
+        })
+      })
+
+      if (!res.ok) throw new Error('Failed to submit booking')
 
       toast.success('Booking request submitted successfully!')
       setFormData({
         serviceName: '',
-        eventType: '',
         eventDate: '',
         guests: '',
         message: '',
         budget: ''
       })
     } catch (error) {
-      toast.error('Failed to submit booking')
+      toast.error((error as Error).message || 'Failed to submit booking')
     } finally {
       setIsLoading(false)
     }
@@ -65,9 +81,7 @@ export function BookingForm() {
         <CardContent className="text-center py-12">
           <h3 className="text-xl font-bold text-gray-900 mb-4">Login Required</h3>
           <p className="text-gray-600 mb-6">Please login to book an event</p>
-          <Button onClick={() => router.push('/login')}>
-            Login to Continue
-          </Button>
+          <Button onClick={() => router.push('/login')}>Login to Continue</Button>
         </CardContent>
       </Card>
     )
@@ -82,48 +96,28 @@ export function BookingForm() {
 
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Service Type
-              </label>
-              <select
-                name="serviceName"
-                value={formData.serviceName}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                required
-              >
-                <option value="">Select a service</option>
-                <option value="Luxury Wedding Package">Luxury Wedding Package</option>
-                <option value="Corporate Events">Corporate Events</option>
-                <option value="Birthday Celebrations">Birthday Celebrations</option>
-                <option value="Anniversary Celebrations">Anniversary Celebrations</option>
-                <option value="Cultural Events">Cultural Events</option>
-                <option value="Product Launches">Product Launches</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Event Type
-              </label>
-              <select
-                name="eventType"
-                value={formData.eventType}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                required
-              >
-                <option value="">Select event type</option>
-                <option value="wedding">Wedding</option>
-                <option value="corporate">Corporate</option>
-                <option value="birthday">Birthday</option>
-                <option value="anniversary">Anniversary</option>
-                <option value="cultural">Cultural</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Service
+            </label>
+            <select
+              name="serviceName"
+              value={formData.serviceName}
+              onChange={handleChange}
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            >
+              <option value="">Select a service</option>
+              <option value="Luxury Wedding Package">Luxury Wedding Package</option>
+              <option value="Corporate Events">Corporate Events</option>
+              <option value="Birthday Celebrations">Birthday Celebrations</option>
+              <option value="Anniversary Celebrations">Anniversary Celebrations</option>
+              <option value="Cultural Events">Cultural Events</option>
+              <option value="Product Launches">Product Launches</option>
+              <option value="Decorations">Decorations</option>
+              <option value="Catering">Catering</option>
+              <option value="Tables & Chairs">Tables & Chairs</option>
+            </select>
           </div>
 
           <div className="grid md:grid-cols-2 gap-6">
@@ -157,16 +151,14 @@ export function BookingForm() {
           />
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Additional Details
-            </label>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Additional Details</label>
             <textarea
               name="message"
               value={formData.message}
               onChange={handleChange}
               rows={4}
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Tell us about your event requirements, special requests, or any questions..."
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Tell us about your event..."
             />
           </div>
 
