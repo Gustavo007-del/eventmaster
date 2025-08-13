@@ -50,13 +50,20 @@ export function BookingForm() {
 
     try {
       const res = await fetch('/api/bookings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...formData,
-          guests: parseInt(formData.guests, 10)
-        })
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('eventmaster_token')}`  // ← This line fixes it!
+      },
+      body: JSON.stringify({
+        serviceName: formData.serviceName,
+        eventDate: formData.eventDate,
+        guests: parseInt(formData.guests, 10),
+        message: formData.message,
+        budget: formData.budget
       })
+    })
+
 
       if (!res.ok) throw new Error('Failed to submit booking')
 

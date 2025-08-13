@@ -61,3 +61,14 @@ export function isValidEmail(email: string): boolean {
 export function normalizeEmail(email: string): string {
   return email.trim().toLowerCase()
 }
+export function verifyTokenFromHeader(token: string) {
+  try {
+    return jwt.verify(token, JWT_SECRET) as {
+      userId: string
+      email: string
+      role: string
+    }
+  } catch {
+    return null
+  }
+}
