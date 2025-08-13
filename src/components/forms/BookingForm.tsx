@@ -68,6 +68,7 @@ export function BookingForm() {
       if (!res.ok) throw new Error('Failed to submit booking')
 
       toast.success('Booking request submitted successfully!')
+      router.push('/dashboard')
       setFormData({
         serviceName: '',
         eventDate: '',

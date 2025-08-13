@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import { Card, CardContent, CardHeader } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -8,28 +9,49 @@ import { Calendar, User, Star, Settings } from 'lucide-react'
 
 export function UserDashboard() {
   const { user } = useAuth()
+  
+  // Replace static data with real state
+  const [stats, setStats] = useState({
+    totalBookings: 0,
+    activeEvents: 0,
+    accountStatus: 'Loading...'
+  })
+  const [recentBookings, setRecentBookings] = useState([])
+  const [loading, setLoading] = useState(true)
 
-  const stats = [
-    { label: 'Total Bookings', value: '3', icon: Calendar },
-    { label: 'Active Events', value: '1', icon: Star },
-    { label: 'Account Status', value: 'Active', icon: User }
-  ]
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const token = localStorage.getItem('eventmaster_token')
+        if (!token) return
 
-  const recentBookings = [
-    {
-      id: 1,
-      service: 'Birthday Celebration',
-      date: '2024-03-15',
-      status: 'confirmed',
-      amount: 25000
-    },
-    {
-      id: 2,
-      service: 'Anniversary Party',
-      date: '2024-02-20',
-      status: 'completed',
-      amount: 35000
+        const response = await fetch('/api/user/stats', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
+        
+        if (response.ok) {
+          const data = await response.json()
+          setStats({
+            totalBookings: data.totalBookings,
+            activeEvents: data.activeEvents,
+            accountStatus: data.accountStatus
+          })
+          setRecentBookings(data.recentBookings || [])
+        }
+      } catch (error) {
+        console.error('Error fetching stats:', error)
+      } finally {
+        setLoading(false)
+      }
     }
+    fetchStats()
+  }, [])
+
+  // Use real data instead of static array
+  const statsDisplay = [
+    { label: 'Total Bookings', value: stats.totalBookings.toString(), icon: Calendar },
+    { label: 'Active Events', value: stats.activeEvents.toString(), icon: Star },
+    { label: 'Account Status', value: stats.accountStatus, icon: User }
   ]
 
   return (
@@ -44,9 +66,9 @@ export function UserDashboard() {
         </p>
       </div>
 
-      {/* Stats Grid */}
+      {/* Stats Grid - Now using real data */}
       <div className="grid md:grid-cols-3 gap-6 mb-8">
-        {stats.map((stat, index) => {
+        {statsDisplay.map((stat, index) => {
           const Icon = stat.icon
           return (
             <Card key={index}>
@@ -67,7 +89,7 @@ export function UserDashboard() {
       </div>
 
       <div className="grid lg:grid-cols-3 gap-8">
-        {/* Recent Bookings */}
+        {/* Recent Bookings - Now using real data */}
         <div className="lg:col-span-2">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
@@ -78,30 +100,36 @@ export function UserDashboard() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {recentBookings.map((booking) => (
-                  <div key={booking.id} className="border border-gray-200 rounded-xl p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="font-semibold text-gray-900">{booking.service}</h3>
-                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                        booking.status === 'confirmed' ? 'bg-green-100 text-green-800' :
-                        booking.status === 'completed' ? 'bg-blue-100 text-blue-800' :
-                        'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {booking.status}
-                      </span>
+                {loading ? (
+                  <p>Loading...</p>
+                ) : recentBookings.length === 0 ? (
+                  <p>No recent bookings</p>
+                ) : (
+                  recentBookings.map((booking) => (
+                    <div key={booking.id} className="border border-gray-200 rounded-xl p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="font-semibold text-gray-900">{booking.service_name}</h3>
+                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                          booking.status === 'confirmed' ? 'bg-green-100 text-green-800' :
+                          booking.status === 'completed' ? 'bg-blue-100 text-blue-800' :
+                          'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {booking.status}
+                        </span>
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        <p>Date: {new Date(booking.event_date).toLocaleDateString()}</p>
+                        <p>Amount: ₹{(booking.total_amount || 0).toLocaleString()}</p>
+                      </div>
                     </div>
-                    <div className="text-sm text-gray-600">
-                      <p>Date: {new Date(booking.date).toLocaleDateString()}</p>
-                      <p>Amount: ₹{booking.amount.toLocaleString()}</p>
-                    </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Quick Actions */}
+        {/* Quick Actions - Keep exactly as is */}
         <div>
           <Card>
             <CardHeader>

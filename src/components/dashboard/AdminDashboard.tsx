@@ -1,5 +1,7 @@
 "use client"
 
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
 import { Card, CardContent, CardHeader } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -7,18 +9,59 @@ import { Users, Calendar, DollarSign, TrendingUp, Settings } from 'lucide-react'
 
 export function AdminDashboard() {
   const { user } = useAuth()
+  const router = useRouter()
+  
+  // Replace static data with real state
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalBookings: 0,
+    revenue: 0,
+    growth: 0
+  })
+  const [recentBookings, setRecentBookings] = useState([])
+  const [loading, setLoading] = useState(true)
 
-  const stats = [
-    { label: 'Total Users', value: '1,247', change: '+12%', icon: Users, color: 'blue' },
-    { label: 'Total Bookings', value: '456', change: '+8%', icon: Calendar, color: 'purple' },
-    { label: 'Revenue', value: '₹12.4L', change: '+15%', icon: DollarSign, color: 'green' },
-    { label: 'Growth', value: '24%', change: '+3%', icon: TrendingUp, color: 'yellow' }
-  ]
+  useEffect(() => {
+    const fetchAdminStats = async () => {
+      try {
+        const token = localStorage.getItem('eventmaster_token')
+        if (!token) return
 
-  const recentBookings = [
-    { id: 1, customer: 'Priya Sharma', service: 'Wedding', amount: 500000, status: 'pending' },
-    { id: 2, customer: 'Rajesh Kumar', service: 'Corporate', amount: 150000, status: 'confirmed' },
-    { id: 3, customer: 'Meera Patel', service: 'Birthday', amount: 25000, status: 'completed' }
+        const response = await fetch('/api/admin/stats', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
+        
+        if (response.ok) {
+          const data = await response.json()
+          setStats({
+            totalUsers: data.totalUsers,
+            totalBookings: data.totalBookings,
+            revenue: data.revenue,
+            growth: data.growth
+          })
+          setRecentBookings(data.recentBookings || [])
+        }
+      } catch (error) {
+        console.error('Error fetching admin stats:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchAdminStats()
+  }, [])
+
+  // Add click handlers for navigation
+  const handleManageUsers = () => router.push('/admin/users')
+  const handleViewBookings = () => router.push('/admin/bookings')
+  const handleSystemSettings = () => router.push('/admin/settings')
+  const handleViewAllBookings = () => router.push('/admin/bookings')
+
+  // Use real data instead of static array
+  const statsDisplay = [
+    { label: 'Total Users', value: stats.totalUsers.toString(), change: '+12%', icon: Users, color: 'blue' },
+    { label: 'Total Bookings', value: stats.totalBookings.toString(), change: '+8%', icon: Calendar, color: 'purple' },
+    { label: 'Revenue', value: `₹${(stats.revenue / 100000).toFixed(1)}L`, change: '+15%', icon: DollarSign, color: 'green' },
+    { label: 'Growth', value: `${stats.growth}%`, change: '+3%', icon: TrendingUp, color: 'yellow' }
   ]
 
   if (user?.role !== 'admin') {
@@ -44,9 +87,9 @@ export function AdminDashboard() {
         </p>
       </div>
 
-      {/* Stats Grid */}
+      {/* Stats Grid - Now using real data */}
       <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {stats.map((stat, index) => {
+        {statsDisplay.map((stat, index) => {
           const Icon = stat.icon
           return (
             <Card key={index}>
@@ -66,53 +109,59 @@ export function AdminDashboard() {
       </div>
 
       <div className="grid lg:grid-cols-3 gap-8">
-        {/* Recent Bookings */}
+        {/* Recent Bookings - Now using real data */}
         <div className="lg:col-span-2">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <h2 className="text-2xl font-bold text-gray-900">Recent Bookings</h2>
-              <Button>View All</Button>
+              <Button onClick={handleViewAllBookings}>View All</Button>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {recentBookings.map((booking) => (
-                  <div key={booking.id} className="border border-gray-200 rounded-xl p-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="font-semibold text-gray-900">{booking.customer}</h3>
-                        <p className="text-sm text-gray-600">{booking.service} • ₹{booking.amount.toLocaleString()}</p>
+                {loading ? (
+                  <p>Loading...</p>
+                ) : recentBookings.length === 0 ? (
+                  <p>No recent bookings</p>
+                ) : (
+                  recentBookings.map((booking) => (
+                    <div key={booking.id} className="border border-gray-200 rounded-xl p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="font-semibold text-gray-900">{booking.user_name || 'Unknown User'}</h3>
+                          <p className="text-sm text-gray-600">{booking.service_name} • ₹{(booking.total_amount || 0).toLocaleString()}</p>
+                        </div>
+                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                          booking.status === 'confirmed' ? 'bg-green-100 text-green-800' :
+                          booking.status === 'completed' ? 'bg-blue-100 text-blue-800' :
+                          'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {booking.status}
+                        </span>
                       </div>
-                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                        booking.status === 'confirmed' ? 'bg-green-100 text-green-800' :
-                        booking.status === 'completed' ? 'bg-blue-100 text-blue-800' :
-                        'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {booking.status}
-                      </span>
                     </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Quick Actions */}
+        {/* Quick Actions - Now with working navigation */}
         <div>
           <Card>
             <CardHeader>
               <h3 className="text-xl font-bold text-gray-900">Quick Actions</h3>
             </CardHeader>
             <CardContent className="space-y-3">
-              <Button className="w-full justify-start">
+              <Button onClick={handleManageUsers} className="w-full justify-start">
                 <Users className="w-4 h-4 mr-2" />
                 Manage Users
               </Button>
-              <Button variant="outline" className="w-full justify-start">
+              <Button onClick={handleViewBookings} variant="outline" className="w-full justify-start">
                 <Calendar className="w-4 h-4 mr-2" />
                 View Bookings
               </Button>
-              <Button variant="outline" className="w-full justify-start">
+              <Button onClick={handleSystemSettings} variant="outline" className="w-full justify-start">
                 <Settings className="w-4 h-4 mr-2" />
                 System Settings
               </Button>
