@@ -7,18 +7,38 @@ import { Card, CardContent, CardHeader } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Users, Calendar, DollarSign, TrendingUp, Settings } from 'lucide-react'
 
+// Add proper TypeScript interfaces
+interface AdminStats {
+  totalUsers: number
+  totalBookings: number
+  revenue: number
+  growth: number
+}
+
+interface RecentBooking {
+  id: number
+  user_name?: string
+  user_email?: string
+  service_name: string
+  total_amount?: number
+  status: string
+  created_at: string
+  event_date: string
+  guests: number
+}
+
 export function AdminDashboard() {
   const { user } = useAuth()
   const router = useRouter()
   
-  // Replace static data with real state
-  const [stats, setStats] = useState({
+  // Properly type the state
+  const [stats, setStats] = useState<AdminStats>({
     totalUsers: 0,
     totalBookings: 0,
     revenue: 0,
     growth: 0
   })
-  const [recentBookings, setRecentBookings] = useState([])
+  const [recentBookings, setRecentBookings] = useState<RecentBooking[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {

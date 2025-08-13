@@ -7,16 +7,32 @@ import { Button } from '@/components/ui/Button'
 import Link from 'next/link'
 import { Calendar, User, Star, Settings } from 'lucide-react'
 
+// Add proper TypeScript interfaces
+interface UserStats {
+  totalBookings: number
+  activeEvents: number
+  accountStatus: string
+}
+
+interface RecentBooking {
+  id: number
+  service_name: string
+  event_date: string
+  status: string
+  total_amount?: number
+  guests: number
+}
+
 export function UserDashboard() {
   const { user } = useAuth()
   
-  // Replace static data with real state
-  const [stats, setStats] = useState({
+  // Properly type the state
+  const [stats, setStats] = useState<UserStats>({
     totalBookings: 0,
     activeEvents: 0,
     accountStatus: 'Loading...'
   })
-  const [recentBookings, setRecentBookings] = useState([])
+  const [recentBookings, setRecentBookings] = useState<RecentBooking[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
