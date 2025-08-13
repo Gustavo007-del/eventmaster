@@ -154,13 +154,14 @@ export const db = {
   // Get all bookings (admin)
   async getAllBookings(): Promise<Booking[]> {
     try {
-      const result = await pool.query('SELECT * FROM bookings ORDER BY created_at DESC')
+      const result = await pool.query('SELECT b.*, u.name    AS user_name, u.email   AS user_email FROM bookings b LEFT JOIN users u ON b.user_id = u.id ORDER BY b.created_at DESC')
       return result.rows
     } catch (error) {
       console.error('Error getting all bookings:', error)
       throw error
     }
   },
+  
 
   // Update booking status
   async updateBookingStatus(id: string | number, status: string): Promise<Booking | null> {

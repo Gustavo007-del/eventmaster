@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
       user_id: parseInt(payload.userId, 10),
       service_name: serviceName,
       event_date: eventDate,
-      total_amount: 0,
+      total_amount: budget,
       status: 'pending',
       event_type: '',
       guests: parseInt(guests, 10),

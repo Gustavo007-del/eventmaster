@@ -30,7 +30,11 @@ export function BookingForm() {
     }
   }, [serviceFromUrl])
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
+  ) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
@@ -49,23 +53,32 @@ export function BookingForm() {
     setIsLoading(true)
 
     try {
+      // Strip non-numeric chars and parse to number
+      const budgetNumber = parseFloat(
+        formData.budget.replace(/[^0-9.]/g, '')
+      )
+
       const res = await fetch('/api/bookings', {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('eventmaster_token')}`  // ← This line fixes it!
-      },
-      body: JSON.stringify({
-        serviceName: formData.serviceName,
-        eventDate: formData.eventDate,
-        guests: parseInt(formData.guests, 10),
-        message: formData.message,
-        budget: formData.budget
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem(
+            'eventmaster_token'
+          )}`
+        },
+        body: JSON.stringify({
+          serviceName: formData.serviceName,
+          eventDate: formData.eventDate,
+          guests: parseInt(formData.guests, 10),
+          message: formData.message,
+          budget: budgetNumber
+        })
       })
-    })
 
-
-      if (!res.ok) throw new Error('Failed to submit booking')
+      if (!res.ok) {
+        const errorData = await res.json()
+        throw new Error(errorData.error || 'Failed to submit booking')
+      }
 
       toast.success('Booking request submitted successfully!')
       router.push('/dashboard')
@@ -87,9 +100,15 @@ export function BookingForm() {
     return (
       <Card>
         <CardContent className="text-center py-12">
-          <h3 className="text-xl font-bold text-gray-900 mb-4">Login Required</h3>
-          <p className="text-gray-600 mb-6">Please login to book an event</p>
-          <Button onClick={() => router.push('/login')}>Login to Continue</Button>
+          <h3 className="text-xl font-bold text-gray-900 mb-4">
+            Login Required
+          </h3>
+          <p className="text-gray-600 mb-6">
+            Please login to book an event
+          </p>
+          <Button onClick={() => router.push('/login')}>
+            Login to Continue
+          </Button>
         </CardContent>
       </Card>
     )
@@ -98,8 +117,12 @@ export function BookingForm() {
   return (
     <Card>
       <CardHeader>
-        <h2 className="text-2xl font-bold text-gray-900">Book Your Event</h2>
-        <p className="text-gray-600">Fill out the form below and we'll get back to you soon</p>
+        <h2 className="text-2xl font-bold text-gray-900">
+          Book Your Event
+        </h2>
+        <p className="text-gray-600">
+          Fill out the form below and we&apos;ll get back to you soon
+        </p>
       </CardHeader>
 
       <CardContent>
@@ -116,10 +139,16 @@ export function BookingForm() {
               required
             >
               <option value="">Select a service</option>
-              <option value="Luxury Wedding Package">Luxury Wedding Package</option>
+              <option value="Luxury Wedding Package">
+                Luxury Wedding Package
+              </option>
               <option value="Corporate Events">Corporate Events</option>
-              <option value="Birthday Celebrations">Birthday Celebrations</option>
-              <option value="Anniversary Celebrations">Anniversary Celebrations</option>
+              <option value="Birthday Celebrations">
+                Birthday Celebrations
+              </option>
+              <option value="Anniversary Celebrations">
+                Anniversary Celebrations
+              </option>
               <option value="Cultural Events">Cultural Events</option>
               <option value="Product Launches">Product Launches</option>
               <option value="Decorations">Decorations</option>
@@ -155,11 +184,13 @@ export function BookingForm() {
             name="budget"
             value={formData.budget}
             onChange={handleChange}
-            placeholder="e.g., ₹1,00,000 - ₹5,00,000"
+            placeholder="e.g., ₹1,00,000"
           />
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Additional Details</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Additional Details
+            </label>
             <textarea
               name="message"
               value={formData.message}
@@ -170,7 +201,12 @@ export function BookingForm() {
             />
           </div>
 
-          <Button type="submit" loading={isLoading} size="lg" className="w-full">
+          <Button
+            type="submit"
+            loading={isLoading}
+            size="lg"
+            className="w-full"
+          >
             {isLoading ? 'Submitting...' : 'Submit Booking Request'}
           </Button>
         </form>
