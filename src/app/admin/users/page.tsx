@@ -7,9 +7,19 @@ import { Button } from '@/components/ui/Button'
 import { ArrowLeft, User, Mail, Calendar } from 'lucide-react'
 import Link from 'next/link'
 
+// Add this interface at the top
+interface User {
+  id: number
+  name: string
+  email: string
+  role: string
+  created_at: string
+}
+
 export default function AdminUsersPage() {
   const { user } = useAuth()
-  const [users, setUsers] = useState([])
+  // Fix: Add proper typing here
+  const [users, setUsers] = useState<User[]>([])  // ← This fixes the error
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -63,33 +73,33 @@ export default function AdminUsersPage() {
             <p>Loading users...</p>
           ) : (
             <div className="space-y-4">
-              {users.map((user) => (
-                <div key={user.id} className="border border-gray-200 rounded-lg p-4">
+              {users.map((userData) => (
+                <div key={userData.id} className="border border-gray-200 rounded-lg p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
                         <User className="w-6 h-6 text-blue-600" />
                       </div>
                       <div>
-                        <h3 className="font-semibold text-gray-900">{user.name}</h3>
+                        <h3 className="font-semibold text-gray-900">{userData.name}</h3>
                         <div className="flex items-center gap-4 text-sm text-gray-600">
                           <span className="flex items-center gap-1">
                             <Mail className="w-4 h-4" />
-                            {user.email}
+                            {userData.email}
                           </span>
                           <span className="flex items-center gap-1">
                             <Calendar className="w-4 h-4" />
-                            Joined {new Date(user.created_at).toLocaleDateString()}
+                            Joined {new Date(userData.created_at).toLocaleDateString()}
                           </span>
                         </div>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                        user.role === 'admin' ? 'bg-purple-100 text-purple-800' :
+                        userData.role === 'admin' ? 'bg-purple-100 text-purple-800' :
                         'bg-green-100 text-green-800'
                       }`}>
-                        {user.role}
+                        {userData.role}
                       </span>
                       <Button size="sm" variant="outline">
                         View Details

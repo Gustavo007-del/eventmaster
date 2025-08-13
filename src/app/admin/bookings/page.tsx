@@ -7,9 +7,23 @@ import { Button } from '@/components/ui/Button'
 import { ArrowLeft, Calendar, User, DollarSign } from 'lucide-react'
 import Link from 'next/link'
 
+// Add this interface at the top
+interface Booking {
+  id: number
+  user_name?: string
+  user_email?: string
+  service_name: string
+  total_amount?: number
+  status: string
+  created_at: string
+  event_date: string
+  guests: number
+}
+
 export default function AdminBookingsPage() {
   const { user } = useAuth()
-  const [bookings, setBookings] = useState([])
+  // Fix: Add proper typing here
+  const [bookings, setBookings] = useState<Booking[]>([])  // ← This fixes the error
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
