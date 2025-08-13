@@ -8,7 +8,7 @@ const services = [
   {
     id: 1,
     name: "Luxury Wedding Package",
-    description: "Complete luxury wedding planning with premium decorations and world-class entertainment",
+    description: "Complete luxury wedding planning with premium decorations",
     price: 500000,
     category: "Wedding",
     features: ["Premium venue decoration", "5-star catering", "Professional photography", "Live entertainment"],

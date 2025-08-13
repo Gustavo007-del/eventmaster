@@ -10,7 +10,7 @@ export default function ServicesPage() {
         <div className="section-padding">
           <div className="container mx-auto container-padding">
             <div className="text-center mb-16">
-              <h1 className="text-heading text-gray-900 mb-4 font-bold">Our Services</h1>
+              <h1 className="text-heading text-gray-900 mb-4 font-bold">Our Packages</h1>
               <p className="text-subheading text-gray-600 max-w-2xl mx-auto">
                 From intimate celebrations to grand spectacles, we create unforgettable experiences
               </p>
