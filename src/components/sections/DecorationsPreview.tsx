@@ -69,9 +69,10 @@ export function DecorationsPreview() {
           {/* Transparent "Explore Decorations" Button */}
           <div className="absolute top-8 right-8">
             <Link href="/decorations">
-              <Button className="bg-white/20 backdrop-blur-md text-white border border-white/30 hover:bg-white/30 transition-all duration-300 shadow-lg">
-                Explore Decorations
-              </Button>
+              <Button variant="outline"
+              className="text-white border-white/70 hover:border-white hover:bg-white/10 focus:bg-white/10 transition duration-300 backdrop-blur-sm">
+              Explore Decorations
+    </Button>
             </Link>
           </div>
 
