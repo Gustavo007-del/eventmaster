@@ -159,24 +159,24 @@ export default function AdminBookingsPage() {
                 </span>
               </div>
               
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
+              <div className="flex flex-col md:flex-row md:justify-between gap-4">
+                <div className="flex-1 p-2 bg-gray-50 rounded">
                   <p className="text-sm text-gray-500">Customer</p>
                   <p className="font-medium">{selectedBooking.user_name || selectedBooking.user_email || 'Unknown User'}</p>
                 </div>
-                <div>
+                <div className="flex-1 p-2 bg-gray-50 rounded">
                   <p className="text-sm text-gray-500">Event Date</p>
                   <p className="font-medium">{new Date(selectedBooking.event_date).toLocaleDateString()}</p>
                 </div>
-                <div>
+                <div className="flex-1 p-2 bg-gray-50 rounded">
                   <p className="text-sm text-gray-500">Guests</p>
                   <p className="font-medium">{selectedBooking.guests}</p>
                 </div>
-                <div>
+                <div className="flex-1 p-2 bg-gray-50 rounded">
                   <p className="text-sm text-gray-500">Total Amount</p>
                   <p className="font-medium">₹{(selectedBooking.total_amount || 0).toLocaleString()}</p>
                 </div>
-                <div>
+                <div className="flex-1 p-2 bg-gray-50 rounded">
                   <p className="text-sm text-gray-500">Booking Created</p>
                   <p className="font-medium">{new Date(selectedBooking.created_at).toLocaleDateString()}</p>
                 </div>
