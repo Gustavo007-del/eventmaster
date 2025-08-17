@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Button } from '@/components/ui/Button'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
@@ -9,6 +9,8 @@ import { decorationsData } from '@/data/decorations'
 export function DecorationsPreview() {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [isHovered, setIsHovered] = useState(false)
+  const [touchStartX, setTouchStartX] = useState<number | null>(null)
+  const [touchEndX, setTouchEndX] = useState<number | null>(null)
 
   // Auto-slide every 4 seconds, paused on hover
   useEffect(() => {
@@ -19,10 +21,30 @@ export function DecorationsPreview() {
     return () => clearInterval(interval)
   }, [isHovered])
 
-  const nextSlide = () =>
+  const nextSlide = useCallback(() => {
     setCurrentSlide((prev) => (prev + 1) % decorationsData.length)
-  const prevSlide = () =>
+  }, [])
+
+  const prevSlide = useCallback(() => {
     setCurrentSlide((prev) => (prev - 1 + decorationsData.length) % decorationsData.length)
+  }, [])
+
+  // Touch handlers for swipe
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEndX(null)
+    setTouchStartX(e.touches[0].clientX)
+  }
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEndX(e.touches[0].clientX)
+  }
+
+  const onTouchEnd = () => {
+    if (touchStartX === null || touchEndX === null) return
+    const distance = touchStartX - touchEndX
+    if (distance > 50) nextSlide()      // left swipe
+    else if (distance < -50) prevSlide() // right swipe
+  }
 
   return (
     <section className="py-20">
@@ -39,9 +61,12 @@ export function DecorationsPreview() {
 
         {/* Carousel */}
         <div
-          className="relative h-96 rounded-2xl overflow-hidden shadow-2xl"
+          className="relative h-96 rounded-2xl overflow-hidden shadow-2xl touch-pan-y"
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
         >
           {/* Slides Container */}
           <div
@@ -51,7 +76,7 @@ export function DecorationsPreview() {
             {decorationsData.map((decoration) => (
               <div
                 key={decoration.id}
-                className="min-w-full h-full bg-cover bg-center relative"
+                className="min-w-full h-full bg-cover bg-center relative select-none"
                 style={{ backgroundImage: `url(${decoration.image})` }}
               >
                 {/* Dark Gradient Overlay */}
@@ -69,10 +94,12 @@ export function DecorationsPreview() {
           {/* Transparent "Explore Decorations" Button */}
           <div className="absolute top-8 right-8">
             <Link href="/decorations">
-              <Button variant="outline"
-              className="text-white border-white/70 hover:border-white hover:bg-white/10 focus:bg-white/10 transition duration-300 backdrop-blur-sm">
-              Explore Decorations
-    </Button>
+              <Button
+                variant="outline"
+                className="text-white border-white/70 hover:border-white hover:bg-white/10 focus:bg-white/10 transition duration-300 backdrop-blur-sm"
+              >
+                Explore Decorations
+              </Button>
             </Link>
           </div>
 
