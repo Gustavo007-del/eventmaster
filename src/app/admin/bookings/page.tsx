@@ -4,10 +4,9 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import { Card, CardContent, CardHeader } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
-import { ArrowLeft, Calendar, User, DollarSign } from 'lucide-react'
+import { ArrowLeft, Calendar, User, DollarSign, X } from 'lucide-react'
 import Link from 'next/link'
 
-// Add this interface at the top
 interface Booking {
   id: number
   user_name?: string
@@ -18,13 +17,14 @@ interface Booking {
   created_at: string
   event_date: string
   guests: number
+  message?: string
 }
 
 export default function AdminBookingsPage() {
   const { user } = useAuth()
-  // Fix: Add proper typing here
-  const [bookings, setBookings] = useState<Booking[]>([])  // ← This fixes the error
+  const [bookings, setBookings] = useState<Booking[]>([])
   const [loading, setLoading] = useState(true)
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null) // Add this
 
   useEffect(() => {
     const fetchBookings = async () => {
@@ -114,7 +114,12 @@ export default function AdminBookingsPage() {
                       }`}>
                         {booking.status}
                       </span>
-                      <Button size="sm" variant="outline">
+                      {/* Fix: Add onClick to show modal */}
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => setSelectedBooking(booking)}
+                      >
                         View Details
                       </Button>
                     </div>
@@ -125,6 +130,70 @@ export default function AdminBookingsPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Modal for booking details */}
+      {selectedBooking && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold">Booking Details</h2>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => setSelectedBooking(null)}
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <h3 className="font-semibold text-lg">{selectedBooking.service_name}</h3>
+                <span className={`inline-block px-2 py-1 rounded-full text-xs font-semibold ${
+                  selectedBooking.status === 'confirmed' ? 'bg-green-100 text-green-800' :
+                  selectedBooking.status === 'completed' ? 'bg-blue-100 text-blue-800' :
+                  selectedBooking.status === 'cancelled' ? 'bg-red-100 text-red-800' :
+                  'bg-yellow-100 text-yellow-800'
+                }`}>
+                  {selectedBooking.status}
+                </span>
+              </div>
+              
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-gray-500">Customer</p>
+                  <p className="font-medium">{selectedBooking.user_name || selectedBooking.user_email || 'Unknown User'}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Event Date</p>
+                  <p className="font-medium">{new Date(selectedBooking.event_date).toLocaleDateString()}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Guests</p>
+                  <p className="font-medium">{selectedBooking.guests}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Total Amount</p>
+                  <p className="font-medium">₹{(selectedBooking.total_amount || 0).toLocaleString()}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Booking Created</p>
+                  <p className="font-medium">{new Date(selectedBooking.created_at).toLocaleDateString()}</p>
+                </div>
+              </div>
+              
+              {selectedBooking.message && (
+                <div>
+                  <p className="text-sm text-gray-500 mb-2">Additional Details</p>
+                  <div className="bg-gray-50 p-3 rounded">
+                    <p>{selectedBooking.message}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
