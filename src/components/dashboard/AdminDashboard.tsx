@@ -5,7 +5,9 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
 import { Card, CardContent, CardHeader } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
-import { Users, Calendar, DollarSign, TrendingUp, Settings } from 'lucide-react'
+import { Users, Calendar, DollarSign, TrendingUp, Settings, Mail } from 'lucide-react'
+import Link from 'next/link'
+
 
 // Add proper TypeScript interfaces
 interface AdminStats {
@@ -75,6 +77,7 @@ export function AdminDashboard() {
   const handleViewBookings = () => router.push('/admin/bookings')
   const handleSystemSettings = () => router.push('/admin/settings')
   const handleViewAllBookings = () => router.push('/admin/bookings')
+  const handleContactEnquiries = () => router.push('/admin/contacts')
 
   // Use real data instead of static array
   const statsDisplay = [
@@ -176,6 +179,10 @@ export function AdminDashboard() {
               <Button onClick={handleManageUsers} className="w-full justify-start">
                 <Users className="w-4 h-4 mr-2" />
                 Manage Users
+              </Button>
+              <Button onClick={handleContactEnquiries} variant="outline" className="w-full justify-start">
+                <Mail className="w-4 h-4 mr-2" />
+                Contact Enquiries
               </Button>
               <Button onClick={handleViewBookings} variant="outline" className="w-full justify-start">
                 <Calendar className="w-4 h-4 mr-2" />

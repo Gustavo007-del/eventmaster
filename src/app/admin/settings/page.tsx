@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button'
 import { ArrowLeft, Settings, Database, Users, Bell } from 'lucide-react'
 import Link from 'next/link'
 
+
 export default function AdminSettingsPage() {
   const { user } = useAuth()
 

@@ -28,19 +28,32 @@ export function ContactForm() {
     e.preventDefault()
     setIsLoading(true)
 
-    // Simulate form submission
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      })
+      if (!res.ok) {
+        const { error } = await res.json()
+        throw new Error(error || 'Submission failed')
+      }
 
-    toast.success('Thank you for your message! We will get back to you soon.')
-    setFormData({
-      firstName: '',
-      lastName: '',
-      email: '',
-      phone: '',
-      subject: '',
-      message: ''
-    })
-    setIsLoading(false)
+      toast.success('Thank you for your message! We will get back to you soon.')
+      setFormData({
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        subject: '',
+        message: ''
+      })
+    } catch (err) {
+      console.error(err)
+      toast.error((err as Error).message || 'An error occurred')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -87,7 +100,7 @@ export function ContactForm() {
               name="phone"
               value={formData.phone}
               onChange={handleChange}
-              placeholder="+91 98765 43210"
+              placeholder="+91 98000 80000"
               required
             />
           </div>

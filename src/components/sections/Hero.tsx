@@ -31,8 +31,18 @@ export function Hero() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
             <Link href="/services">
               <Button size="lg" className="group">
-                Explore Services
+                Explore Packages
                 <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </Link>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-1 justify-center mb-16">
+            <Link href="/contact">
+              <Button
+                variant="outline"
+                className="text-white border-white/70 hover:border-white hover:bg-white/10 focus:bg-white/10 transition duration-300 backdrop-blur-sm"
+              >
+                Contact Us
               </Button>
             </Link>
           </div>

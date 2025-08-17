@@ -10,9 +10,9 @@ export function ContactInfo() {
         <div>
           <h3 className="text-xl font-bold text-gray-900 mb-2">Visit Us</h3>
           <p className="text-gray-600">
-            EventMaster Plaza<br />
-            MG Road, Bangalore - 560001<br />
-            Karnataka, India
+            Krishna Pro Events <br />
+            Vengeri, Kozhikode - 673011<br />
+            Kerala, India
           </p>
         </div>
       </div>
@@ -24,8 +24,8 @@ export function ContactInfo() {
         <div>
           <h3 className="text-xl font-bold text-gray-900 mb-2">Call Us</h3>
           <p className="text-gray-600">
-            +91 98765 43210<br />
-            +91 98765 43211
+            +91 70348 02124<br />
+            +91 90614 44017
           </p>
         </div>
       </div>
@@ -37,8 +37,8 @@ export function ContactInfo() {
         <div>
           <h3 className="text-xl font-bold text-gray-900 mb-2">Email Us</h3>
           <p className="text-gray-600">
-            hello@eventmaster.com<br />
-            bookings@eventmaster.com
+            abhinavmoothadikal@gmail.com<br />
+            shijilkt27@gmail.com.com
           </p>
         </div>
       </div>

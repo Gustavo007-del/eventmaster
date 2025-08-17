@@ -175,6 +175,34 @@ export const db = {
       console.error('Error updating booking status:', error)
       throw error
     }
+  },
+  // Create a new contact entry
+  async createContact(data: {
+    first_name: string
+    last_name: string
+    email: string
+    phone: string
+    subject: string
+    message: string
+  }) {
+    const { first_name, last_name, email, phone, subject, message } = data
+    const result = await pool.query(
+      `INSERT INTO contacts
+       (first_name, last_name, email, phone, subject, message, created_at)
+       VALUES ($1,$2,$3,$4,$5,$6,NOW())
+       RETURNING *`,
+      [first_name, last_name, email, phone, subject, message]
+    )
+    return result.rows[0]
+  },
+  // Fetch all contacts (for admin)
+  async getAllContacts() {
+    const result = await pool.query(
+      `SELECT id, first_name, last_name, email, phone, subject, message, created_at
+       FROM contacts
+       ORDER BY created_at DESC`
+    )
+    return result.rows
   }
 }
 
