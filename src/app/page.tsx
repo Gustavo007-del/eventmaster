@@ -19,9 +19,9 @@ export default function HomePage() {
         <Stats />
         <ServicesPreview />
         <DecorationsPreview />
-        <CateringPreview />
         <TablesChairsPreview />
         <EquipmentPreview />
+        <CateringPreview />
         <Testimonials />
         <CTA />
       </main>
