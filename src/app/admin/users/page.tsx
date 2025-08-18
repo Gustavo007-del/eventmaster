@@ -20,7 +20,7 @@ export default function AdminUsersPage() {
   const { user } = useAuth()
   const [users, setUsers] = useState<UserData[]>([])
   const [loading, setLoading] = useState(true)
-  const [selectedUser, setSelectedUser] = useState<UserData | null>(null) // Add this
+  const [selectedUser, setSelectedUser] = useState<UserData | null>(null)
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -75,17 +75,17 @@ export default function AdminUsersPage() {
             <div className="space-y-4">
               {users.map((userData) => (
                 <div key={userData.id} className="border border-gray-200 rounded-lg p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                        <User className="w-6 h-6 text-blue-600" />
+                  <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                        <User className="w-5 h-5 text-blue-600" />
                       </div>
                       <div>
                         <h3 className="font-semibold text-gray-900">{userData.name}</h3>
-                        <div className="flex items-center gap-4 text-sm text-gray-600">
+                        <div className="flex flex-col gap-1 md:flex-row md:gap-4 text-sm text-gray-600">
                           <span className="flex items-center gap-1">
                             <Mail className="w-4 h-4" />
-                            {userData.email}
+                            <span className="break-all">{userData.email}</span>
                           </span>
                           <span className="flex items-center gap-1">
                             <Calendar className="w-4 h-4" />
@@ -94,18 +94,18 @@ export default function AdminUsersPage() {
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 mt-2 md:mt-0">
                       <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
                         userData.role === 'admin' ? 'bg-purple-100 text-purple-800' :
                         'bg-green-100 text-green-800'
                       }`}>
                         {userData.role}
                       </span>
-                      {/* Fix: Add onClick to show modal */}
                       <Button 
                         size="sm" 
                         variant="outline"
                         onClick={() => setSelectedUser(userData)}
+                        className="text-xs md:text-sm"
                       >
                         View Details
                       </Button>
@@ -120,10 +120,10 @@ export default function AdminUsersPage() {
 
       {/* Modal for user details */}
       {selectedUser && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-4 md:p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold">User Details</h2>
+              <h2 className="text-xl md:text-2xl font-bold">User Details</h2>
               <Button 
                 variant="ghost" 
                 size="sm"
@@ -149,14 +149,14 @@ export default function AdminUsersPage() {
                 </div>
               </div>
               
-              <div className="grid md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-gray-500">User ID</p>
                   <p className="font-medium">#{selectedUser.id}</p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">Email Address</p>
-                  <p className="font-medium">{selectedUser.email}</p>
+                  <p className="font-medium break-all">{selectedUser.email}</p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">Account Created</p>
@@ -176,7 +176,7 @@ export default function AdminUsersPage() {
                 </div>
               </div>
               
-              <div className="flex gap-2 pt-4">
+              <div className="flex gap-2 pt-4 flex-wrap">
                 <Button variant="outline" size="sm">
                   Edit User
                 </Button>
