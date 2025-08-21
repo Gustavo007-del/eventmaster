@@ -11,7 +11,7 @@ export function EquipmentPreview() {
         </div>
         
         <div className="text-center">
-          <Link href="/equipment">
+          <Link href="/rent-equipment">
             <Button size="lg">View Equipment</Button>
           </Link>
         </div>

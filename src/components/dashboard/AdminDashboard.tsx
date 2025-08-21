@@ -5,9 +5,8 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
 import { Card, CardContent, CardHeader } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
-import { Users, Calendar, DollarSign, TrendingUp, Settings, Mail } from 'lucide-react'
+import { Users, Calendar, DollarSign, TrendingUp, Settings, Mail, Package } from 'lucide-react'
 import Link from 'next/link'
-
 
 // Add proper TypeScript interfaces
 interface AdminStats {
@@ -78,6 +77,7 @@ export function AdminDashboard() {
   const handleSystemSettings = () => router.push('/admin/settings')
   const handleViewAllBookings = () => router.push('/admin/bookings')
   const handleContactEnquiries = () => router.push('/admin/contacts')
+  const handleEquipmentRentals = () => router.push('/admin/equipment-rentals') // NEW
 
   // Use real data instead of static array
   const statsDisplay = [
@@ -132,7 +132,7 @@ export function AdminDashboard() {
       </div>
 
       <div className="grid lg:grid-cols-3 gap-8">
-        {/* Recent Bookings - Now using real data */}
+        {/* Recent Bookings - Fixed mobile layout */}
         <div className="lg:col-span-2">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
@@ -148,12 +148,13 @@ export function AdminDashboard() {
                 ) : (
                   recentBookings.map((booking) => (
                     <div key={booking.id} className="border border-gray-200 rounded-xl p-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h3 className="font-semibold text-gray-900">{booking.user_name || 'Unknown User'}</h3>
-                          <p className="text-sm text-gray-600">{booking.service_name} • ₹{(booking.total_amount || 0).toLocaleString()}</p>
+                      {/* Fixed: Mobile responsive layout */}
+                      <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                        <div className="min-w-0 flex-1">
+                          <h3 className="font-semibold text-gray-900 truncate">{booking.user_name || 'Unknown User'}</h3>
+                          <p className="text-sm text-gray-600 truncate">{booking.service_name} • ₹{(booking.total_amount || 0).toLocaleString()}</p>
                         </div>
-                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                        <span className={`px-2 py-1 rounded-full text-xs font-semibold self-start md:self-center ${
                           booking.status === 'confirmed' ? 'bg-green-100 text-green-800' :
                           booking.status === 'completed' ? 'bg-blue-100 text-blue-800' :
                           'bg-yellow-100 text-yellow-800'
@@ -169,7 +170,7 @@ export function AdminDashboard() {
           </Card>
         </div>
 
-        {/* Quick Actions - Now with working navigation */}
+        {/* Quick Actions - Added Equipment Rentals */}
         <div>
           <Card>
             <CardHeader>
@@ -180,14 +181,23 @@ export function AdminDashboard() {
                 <Users className="w-4 h-4 mr-2" />
                 Manage Users
               </Button>
-              <Button onClick={handleContactEnquiries} variant="outline" className="w-full justify-start">
-                <Mail className="w-4 h-4 mr-2" />
-                Contact Enquiries
-              </Button>
+              
               <Button onClick={handleViewBookings} variant="outline" className="w-full justify-start">
                 <Calendar className="w-4 h-4 mr-2" />
                 View Bookings
               </Button>
+
+              <Button onClick={handleContactEnquiries} variant="outline" className="w-full justify-start">
+                <Mail className="w-4 h-4 mr-2" />
+                Contact Enquiries
+              </Button>
+
+              {/* NEW: Equipment Rentals Button */}
+              <Button onClick={handleEquipmentRentals} variant="outline" className="w-full justify-start">
+                <Package className="w-4 h-4 mr-2" />
+                Equipment Rentals
+              </Button>
+              
               <Button onClick={handleSystemSettings} variant="outline" className="w-full justify-start">
                 <Settings className="w-4 h-4 mr-2" />
                 System Settings

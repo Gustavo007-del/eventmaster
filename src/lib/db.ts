@@ -143,7 +143,10 @@ export const db = {
   // Get bookings by user
   async getBookingsByUser(userId: string | number): Promise<Booking[]> {
     try {
-      const result = await pool.query('SELECT * FROM bookings WHERE user_id = $1 ORDER BY created_at DESC', [userId])
+      const result = await pool.query(
+        'SELECT * FROM bookings WHERE user_id = $1 AND (deleted = FALSE OR deleted IS NULL) ORDER BY created_at DESC', 
+        [userId]
+      )
       return result.rows
     } catch (error) {
       console.error('Error getting bookings by user:', error)
@@ -151,24 +154,29 @@ export const db = {
     }
   },
 
-  // Get all bookings (admin)
+  // Get all bookings (admin) - Updated to exclude deleted bookings
   async getAllBookings(): Promise<Booking[]> {
     try {
-      const result = await pool.query('SELECT b.*, u.name    AS user_name, u.email   AS user_email FROM bookings b LEFT JOIN users u ON b.user_id = u.id ORDER BY b.created_at DESC')
+      const result = await pool.query(`
+        SELECT b.*, u.name AS user_name, u.email AS user_email 
+        FROM bookings b 
+        LEFT JOIN users u ON b.user_id = u.id 
+        WHERE b.deleted = FALSE OR b.deleted IS NULL
+        ORDER BY b.created_at DESC
+      `)
       return result.rows
     } catch (error) {
       console.error('Error getting all bookings:', error)
       throw error
     }
   },
-  
 
-  // Update booking status
-  async updateBookingStatus(id: string | number, status: string): Promise<Booking | null> {
+  // Update booking status - Updated version
+  async updateBookingStatus(bookingId: number, status: string): Promise<Booking | null> {
     try {
       const result = await pool.query(
-        'UPDATE bookings SET status = $1, updated_at = NOW() WHERE id = $2 RETURNING *',
-        [status, id]
+        'UPDATE bookings SET status = $1, updated_at = NOW() WHERE id = $2 AND (deleted = FALSE OR deleted IS NULL) RETURNING *',
+        [status, bookingId]
       )
       return result.rows[0] || null
     } catch (error) {
@@ -176,7 +184,152 @@ export const db = {
       throw error
     }
   },
-  // Create a new contact entry
+
+  // Delete booking (soft delete) - New method
+  async deleteBooking(bookingId: number): Promise<Booking | null> {
+    try {
+      const result = await pool.query(
+        'UPDATE bookings SET deleted = TRUE, updated_at = NOW() WHERE id = $1 RETURNING *',
+        [bookingId]
+      )
+      return result.rows[0] || null
+    } catch (error) {
+      console.error('Error deleting booking:', error)
+      throw error
+    }
+  },
+
+  // Equipment methods - New methods
+  async getAllEquipments() {
+    try {
+      const result = await pool.query(`
+        SELECT id, name, description, daily_rate, category, in_stock, image_url
+        FROM equipments
+        ORDER BY category, name
+      `)
+      return result.rows
+    } catch (error) {
+      console.error('Error getting all equipments:', error)
+      throw error
+    }
+  },
+
+  async createEquipmentRental(rental: {
+    customer_name: string
+    customer_email: string
+    customer_phone?: string
+    start_date: string
+    end_date: string
+    total_days: number
+    total_cost: number
+    special_requests?: string
+  }) {
+    try {
+      const result = await pool.query(`
+        INSERT INTO equipment_rentals 
+          (customer_name, customer_email, customer_phone, start_date, end_date, total_days, total_cost, special_requests)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        RETURNING *
+      `, [
+        rental.customer_name,
+        rental.customer_email,
+        rental.customer_phone || '',
+        rental.start_date,
+        rental.end_date,
+        rental.total_days,
+        rental.total_cost,
+        rental.special_requests || ''
+      ])
+      return result.rows[0]
+    } catch (error) {
+      console.error('Error creating equipment rental:', error)
+      throw error
+    }
+  },
+
+  async addEquipmentRentalItem(item: {
+    rental_id: number
+    equipment_id: number
+    quantity: number
+    unit_price: number
+    total_price: number
+  }) {
+    try {
+      const result = await pool.query(`
+        INSERT INTO equipment_rental_items (rental_id, equipment_id, quantity, unit_price, total_price)
+        VALUES ($1, $2, $3, $4, $5)
+        RETURNING *
+      `, [item.rental_id, item.equipment_id, item.quantity, item.unit_price, item.total_price])
+      return result.rows[0]
+    } catch (error) {
+      console.error('Error adding equipment rental item:', error)
+      throw error
+    }
+  },
+
+  async getAllEquipmentRentals() {
+    try {
+      const result = await pool.query(`
+        SELECT 
+          er.id, er.customer_name, er.customer_email, er.customer_phone,
+          er.start_date, er.end_date, er.total_days, er.total_cost,
+          er.status, er.special_requests, er.created_at,
+          COALESCE(
+            json_agg(
+              CASE WHEN e.id IS NOT NULL THEN
+                json_build_object(
+                  'equipment_name', e.name,
+                  'quantity', eri.quantity,
+                  'unit_price', eri.unit_price,
+                  'total_price', eri.total_price
+                )
+              END
+            ) FILTER (WHERE e.id IS NOT NULL), 
+            '[]'::json
+          ) as items
+        FROM equipment_rentals er
+        LEFT JOIN equipment_rental_items eri ON er.id = eri.rental_id
+        LEFT JOIN equipments e ON eri.equipment_id = e.id
+        WHERE er.deleted = FALSE OR er.deleted IS NULL
+        GROUP BY er.id, er.customer_name, er.customer_email, er.customer_phone,
+                 er.start_date, er.end_date, er.total_days, er.total_cost,
+                 er.status, er.special_requests, er.created_at
+        ORDER BY er.created_at DESC
+      `)
+      return result.rows
+    } catch (error) {
+      console.error('Error getting all equipment rentals:', error)
+      throw error
+    }
+  },
+
+  async updateEquipmentRentalStatus(rentalId: number, status: string) {
+    try {
+      const result = await pool.query(
+        'UPDATE equipment_rentals SET status = $1, updated_at = NOW() WHERE id = $2 AND (deleted = FALSE OR deleted IS NULL) RETURNING *',
+        [status, rentalId]
+      )
+      return result.rows[0] || null
+    } catch (error) {
+      console.error('Error updating equipment rental status:', error)
+      throw error
+    }
+  },
+
+  async deleteEquipmentRental(rentalId: number) {
+    try {
+      const result = await pool.query(
+        'UPDATE equipment_rentals SET deleted = TRUE, updated_at = NOW() WHERE id = $1 RETURNING *',
+        [rentalId]
+      )
+      return result.rows[0] || null
+    } catch (error) {
+      console.error('Error deleting equipment rental:', error)
+      throw error
+    }
+  },
+
+  // Contact operations - Your existing methods
   async createContact(data: {
     first_name: string
     last_name: string
@@ -185,24 +338,40 @@ export const db = {
     subject: string
     message: string
   }) {
-    const { first_name, last_name, email, phone, subject, message } = data
-    const result = await pool.query(
-      `INSERT INTO contacts
-       (first_name, last_name, email, phone, subject, message, created_at)
-       VALUES ($1,$2,$3,$4,$5,$6,NOW())
-       RETURNING *`,
-      [first_name, last_name, email, phone, subject, message]
-    )
-    return result.rows[0]
+    try {
+      const { first_name, last_name, email, phone, subject, message } = data
+      const result = await pool.query(
+        `INSERT INTO contacts
+         (first_name, last_name, email, phone, subject, message, created_at)
+         VALUES ($1,$2,$3,$4,$5,$6,NOW())
+         RETURNING *`,
+        [first_name, last_name, email, phone, subject, message]
+      )
+      return result.rows[0]
+    } catch (error) {
+      console.error('Error creating contact:', error)
+      throw error
+    }
   },
+
   // Fetch all contacts (for admin)
   async getAllContacts() {
-    const result = await pool.query(
-      `SELECT id, first_name, last_name, email, phone, subject, message, created_at
-       FROM contacts
-       ORDER BY created_at DESC`
-    )
-    return result.rows
+    try {
+      const result = await pool.query(
+        `SELECT id, first_name, last_name, email, phone, subject, message, created_at
+         FROM contacts
+         ORDER BY created_at DESC`
+      )
+      return result.rows
+    } catch (error) {
+      console.error('Error getting all contacts:', error)
+      throw error
+    }
+  },
+
+  // Utility method for custom queries
+  async query(text: string, params?: any[]) {
+    return pool.query(text, params)
   }
 }
 
